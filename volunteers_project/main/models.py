@@ -31,6 +31,17 @@ class CustomUserManager(BaseUserManager):
         return user
 
 
+class Region(models.Model):
+    name = models.CharField("Наименование региона", max_length=255)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Регион'
+        verbose_name_plural = 'Регионы'
+
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=50, unique=True)
 
@@ -42,9 +53,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     
     is_staff = models.BooleanField(default=False, verbose_name='Служебный аккаунт')
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    DIRECTION_CHOICES = (
+        ('нарко', 'нарко'),
+        ('экологическое', 'экологическое'),
+        ('культурное', 'культурное'),
+        ('спортивное', 'спортивное'),
+    )
+
+    region = models.ForeignKey(Region, verbose_name="Район", on_delete=models.CASCADE, null=True)
+
+    direction = models.CharField("Направление", max_length=20, choices=DIRECTION_CHOICES)
 
     telegram_user_id = models.CharField("Телеграм ID", max_length=255, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -65,3 +87,86 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+
+class UserWork(models.Model):
+    user = models.ForeignKey(CustomUser, verbose_name="Пользователь", on_delete=models.CASCADE)
+
+    link = models.URLField("Ссылка")
+
+    STATUS_CHOICES = (
+        ('подтверждено', 'Подтверждено'),
+        ('не подтверждено', 'Не подтверждено'),
+    )
+
+    status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES)
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.user.telegram_user_id
+
+    class Meta:
+        verbose_name = 'Работа пользователя'
+        verbose_name_plural = 'Работы пользователей'
+
+
+class UserScore(models.Model):
+    user = models.ForeignKey(CustomUser, verbose_name="Пользователь", on_delete=models.CASCADE)
+
+    score = models.PositiveIntegerField("Балл")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.user
+
+    class Meta:
+        verbose_name = 'Балл пользователя'
+        verbose_name_plural = 'Баллы пользователей'
+
+
+class Task(models.Model):
+    name = models.CharField("Наименование задания", max_length=255)
+
+    text = models.TextField("Брифинг задания")
+
+    score = models.IntegerField("Количество баллов за задание")
+
+    start_date = models.DateField("Период: начало")
+
+    end_date = models.DateField("Период: завершение")
+
+    assigned = models.BooleanField("Назначено", default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Задание'
+        verbose_name_plural = 'Задания'
+
+
+class UserTask(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, verbose_name="Волонтер")
+
+    task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, verbose_name="Задание")
+
+    STATUS_CHOICES = (
+        ('выполнено', 'Выполнено'),
+        ('на выполнении', 'На выполнении'),
+        ('не выполнено', 'Не выполнено'),
+    )
+
+    status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES, default='на выполнении')
+
+    def __str__(self):
+        return self.user.telegram_user_id + " / " + self.task.name
+
+    class Meta:
+        verbose_name = 'Назначенное задание'
+        verbose_name_plural = 'Назначенные задания'

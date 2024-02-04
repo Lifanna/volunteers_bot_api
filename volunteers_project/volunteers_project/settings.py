@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
     'drf_yasg',
     'corsheaders',
@@ -98,6 +99,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'volunteers_project.wsgi.application'
+
+ASGI_APPLICATION = 'volunteers_project.asgi.application'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -161,3 +164,9 @@ EMAIL_USE_SSL = False
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
