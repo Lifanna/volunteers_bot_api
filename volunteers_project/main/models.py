@@ -97,6 +97,7 @@ class UserWork(models.Model):
     STATUS_CHOICES = (
         ('подтверждено', 'Подтверждено'),
         ('не подтверждено', 'Не подтверждено'),
+        ('новое', 'Новое'),
     )
 
     status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES)

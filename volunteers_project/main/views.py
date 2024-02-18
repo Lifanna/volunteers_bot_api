@@ -14,6 +14,7 @@ def index(request):
 class LoginAPIView(views.APIView):
     def post(self, request):
         telegram_user_id = request.data.get('telegram_user_id')
+        user = models.CustomUser.objects.filter(telegram_user_id=telegram_user_id)
 
         try:
             user = models.CustomUser.objects.get(telegram_user_id=telegram_user_id)
