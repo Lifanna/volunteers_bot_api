@@ -26,7 +26,7 @@ class LoginAPIView(views.APIView):
 
 class VerifyAPIView(views.APIView):
     def post(self, request):
-        phone_number = request.data.get('phone_number')
+        phone_number = str(request.data.get('phone_number')).replace('+', '')
         telegram_user_id = request.data.get('telegram_user_id')
 
         try:
