@@ -54,7 +54,7 @@ class UserWorkCreateAPIView(generics.CreateAPIView):
             return Response({"detail": "Пользователь с таким telegram_user_id не найден"}, status=status.HTTP_404_NOT_FOUND)
 
         # Создаем запись о работе пользователя
-        user_work = models.UserWork.objects.create(user=user, link=link, status='не подтверждено')
+        user_work = models.UserWork.objects.create(user=user, link=link, status='новое')
         # user_score, created = models.UserScore.objects.get_or_create(user=user)
         
         if models.UserScore.objects.filter(user=user).exists():
