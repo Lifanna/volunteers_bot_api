@@ -47,6 +47,8 @@ class UserWorkCreateAPIView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         telegram_user_id = request.data.get('telegram_user_id')
         link = request.data.get('link')
+        if link and 'https://' not in link:
+            link = 'https://' + link
 
         try:
             user = models.CustomUser.objects.get(telegram_user_id=telegram_user_id)
