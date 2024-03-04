@@ -217,6 +217,23 @@ def parse_job():
                     close_button.click()
                     continue
                 if success:
+                    try:
+                        conn = psycopg2.connect(**params)
+                        print("Подключение успешно.")
+
+                        cursor = conn.cursor()
+                        cursor.execute('''
+                            UPDATE main_userwork SET
+                            status = '%s', 
+                            WHERE link = '%s';
+                        '''%('отправлено на проверку', link))
+
+                    except (Exception, psycopg2.DatabaseError) as error:
+                        print(error)
+                    finally:
+                        if conn is not None:
+                            conn.close()
+                            print("Подключение закрыто.")
                     break
             except Exception as e:
                 print(f"Ошибка при обработке ссылки {link}: {str(e)}. Повторяем попытку.")

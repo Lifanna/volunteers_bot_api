@@ -30,7 +30,7 @@ def mail_checker_job():
 
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT * FROM main_userwork WHERE status = 'новое'
+            SELECT * FROM main_userwork WHERE status = 'отправлено на проверку'
         ''')
 
         user_links = cursor.fetchall()
