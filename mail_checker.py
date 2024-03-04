@@ -94,6 +94,7 @@ def mail_checker_job():
 
                 for link_object in user_links:
                     link = link_object[1]
+                    user_id = link_object[3]
                     if link in body:
                         text = body
                         match = re.search(r'Вашему обращению присвоен номер: (\S+)', text)
@@ -102,12 +103,16 @@ def mail_checker_job():
 
                             if 'подтверждено' in body.lower():
                                 approved_links.append({
-                                    link: "подтверждено"
+                                    'link': link,
+                                    'status': "подтверждено",
+                                    'user_id': user_id,
                                 })
                                 break
                             else:
                                 approved_links.append({
-                                    link: "не подтверждено"
+                                    'link': link,
+                                    'status': "не подтверждено",
+                                    'user_id': user_id,
                                 })
                                 break
 
@@ -120,13 +125,25 @@ def mail_checker_job():
 
         cursor = conn.cursor()
         for approved in approved_links:
-            for link, status in approved.items():
-                print("Da: ", link, status)
+            # for link, status in approved.items():
+            link = approved.get("link")
+            status = approved.get("status")
+            user_id = approved.get("user_id")
+            print("FFFFF: ", approved.get("user_id"))
+            print("Da: ", approved.get("link"), approved.get("status"))
+            cursor.execute('''
+                UPDATE main_userwork SET
+                status = '%s', 
+                WHERE link = '%s';
+            '''%(status, link))
+
+            if status == 'подтверждено':
                 cursor.execute('''
-                    UPDATE main_userwork SET
-                    status = '%s', 
-                    WHERE link = '%s' 
-                '''%(status, link))
+                    IF EXISTS (SELECT * FROM main_userscore WHERE user_id=%s)
+                        UPDATE main_userscore SET score = score + 100 WHERE user_id=%s;
+                    ELSE
+                        INSERT INTO main_userscore (user_id, score) VALUES (%s, 100);
+                '''%(user_id, user_id, user_id))
 
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:

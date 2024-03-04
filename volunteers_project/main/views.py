@@ -55,6 +55,14 @@ class UserWorkCreateAPIView(generics.CreateAPIView):
 
         # Создаем запись о работе пользователя
         user_work = models.UserWork.objects.create(user=user, link=link, status='не подтверждено')
+        # user_score, created = models.UserScore.objects.get_or_create(user=user)
+        
+        if models.UserScore.objects.filter(user=user).exists():
+            user_score = models.UserScore.objects.get(user=user)
+            user_score.score += 10
+            user_score.save()
+        else:
+            models.UserScore.objects.create(user=user, score=10)
 
         serializer = self.get_serializer(user_work)
         headers = self.get_success_headers(serializer.data)
@@ -105,6 +113,8 @@ class UserProfileAPIView(generics.RetrieveAPIView):
         user_info["total_approved"] = total_approved
         user_info["total_approved_current_month"] = total_approved_current_month
 
+        print("SSSS:", user_info)
+
         return Response(user_info)
 
 
@@ -132,3 +142,50 @@ class TaskListAPIView(generics.ListAPIView):
         )[:10]
 
         return queryset
+
+
+class RatingAPIView(generics.ListAPIView):
+    model = models.UserScore
+    queryset = models.UserScore.objects.all()
+    serializer_class = serializers.UserScoreSerializer
+
+
+class UserTaskCreateAPIView(generics.CreateAPIView):
+    model = models.UserTask
+    serializer_class = serializers.UserTaskSerializer
+    queryset = models.UserTask.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        # Получаем telegram_user_id из запроса
+        telegram_user_id = request.data.get('user')
+
+        print("USER: ", request.data)
+
+        if telegram_user_id:
+            user = models.CustomUser.objects.get(
+                telegram_user_id=telegram_user_id,
+            )
+
+            task = models.Task.objects.get(
+                pk=request.data.get('task'),
+            )
+
+            user_task = models.UserTask.objects.create(
+                user=user,
+                task=task,
+                status='на выполнении'
+            )
+
+            update_task_by_pk(task.pk)
+        else:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({}, status=status.HTTP_201_CREATED)
+
+def update_task_by_pk(task_id):
+    try:
+        task = models.Task.objects.get(pk=task_id)
+        task.assigned = True
+        task.save()
+        return task
+    except models.Task.DoesNotExist:
+        return None

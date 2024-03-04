@@ -25,4 +25,6 @@ urlpatterns = [
     path('api/send_link/', views.UserWorkCreateAPIView.as_view()),
     path('api/auth/verify/', views.VerifyAPIView.as_view()),
     path('api/auth/signin/', views.LoginAPIView.as_view()),
+    path('api/rating/', views.RatingAPIView.as_view()),
+    path('api/tasks/new/', views.UserTaskCreateAPIView.as_view()),
 ]
