@@ -125,7 +125,7 @@ class UserScore(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.user
+        return self.user.telegram_user_id
 
     class Meta:
         verbose_name = 'Балл пользователя'

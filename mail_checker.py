@@ -35,7 +35,7 @@ def mail_checker_job():
 
         user_links = cursor.fetchall()
 
-        print("USER ID ", user_links[0][3])
+        # print("USER ID ", user_links[0][3])
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
@@ -91,10 +91,12 @@ def mail_checker_job():
                 # Decode the text part of the email
                 body = part.get_payload(decode=True).decode(part.get_content_charset())
                 print("TEXT:", body)
+                print("LINKSSSS:", user_links)
 
                 for link_object in user_links:
                     link = link_object[1]
                     user_id = link_object[3]
+                    print("QQQQQQAAA: ", link_object)
                     if link in body:
                         text = body
                         match = re.search(r'Вашему обращению присвоен номер: (\S+)', text)
@@ -115,6 +117,13 @@ def mail_checker_job():
                                     'user_id': user_id,
                                 })
                                 break
+                        else:
+                            approved_links.append({
+                                'link': link,
+                                'status': "не подтверждено",
+                                'user_id': user_id,
+                            })
+                            break
 
     # Close the connection
     mail.logout()
@@ -122,6 +131,8 @@ def mail_checker_job():
     try:
         conn = psycopg2.connect(**params)
         print("Подключение успешно.")
+
+        print("APPROVEDS: ", approved_links)
 
         cursor = conn.cursor()
         for approved in approved_links:
@@ -133,7 +144,7 @@ def mail_checker_job():
             print("Da: ", approved.get("link"), approved.get("status"))
             cursor.execute('''
                 UPDATE main_userwork SET
-                status = '%s', 
+                status = '%s'
                 WHERE link = '%s';
             '''%(status, link))
 
