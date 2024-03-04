@@ -120,7 +120,7 @@ def parse_job():
         ''')
 
         links = cursor.fetchall()
-        print("USER ID ", links[0])
+        # print("USER ID ", links[0])
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
@@ -226,7 +226,7 @@ def parse_job():
                             UPDATE main_userwork SET
                             status = '%s', 
                             WHERE link = '%s';
-                        '''%('отправлено на проверку', link))
+                        '''%('проверка', link))
 
                     except (Exception, psycopg2.DatabaseError) as error:
                         print(error)
