@@ -126,10 +126,12 @@ class UserWorkListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         telegram_user_id = self.kwargs.get("telegram_user_id")
+        offset = self.kwargs.get('offset')
+        offset = int(offset)
 
         queryset = models.UserWork.objects.filter(
             user__telegram_user_id=telegram_user_id
-        )
+        ).order_by('pk')[offset:offset + 2]
 
         return queryset
 
@@ -183,6 +185,25 @@ class UserTaskCreateAPIView(generics.CreateAPIView):
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response({}, status=status.HTTP_201_CREATED)
 
+
+class UserTaskListAPIView(generics.ListAPIView):
+    serializer_class = serializers.UserTaskSerializer
+    queryset = models.UserTask.objects.all()
+
+    def get_queryset(self):
+        telegram_user_id = self.kwargs.get('telegram_user_id')
+
+        if telegram_user_id:
+            queryset = models.UserTask.objects.filter(
+                user__telegram_user_id=telegram_user_id,
+                status='на выполнении'
+            )
+        else:
+            queryset = models.UserTask.objects.none()
+
+        return queryset
+
+
 def update_task_by_pk(task_id):
     try:
         task = models.Task.objects.get(pk=task_id)
@@ -191,3 +212,13 @@ def update_task_by_pk(task_id):
         return task
     except models.Task.DoesNotExist:
         return None
+
+
+class UserTaskUpdateAPIView(views.APIView):
+    def post(self, request, *args, **kwargs):
+        print("ASDSADDSD: ", request.data.get("user_task_id"))
+        instance = models.UserTask.objects.get(pk=request.data.get("user_task_id"))
+        instance.status = 'Выполнено'
+        instance.save()
+
+        return Response({'success': True}, status=status.HTTP_200_OK)

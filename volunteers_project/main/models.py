@@ -167,7 +167,7 @@ class UserTask(models.Model):
     status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES, default='на выполнении')
 
     def __str__(self):
-        return self.user.telegram_user_id + " / " + self.task.name
+        return str(self.user) + " / " + str(self.task)
 
     class Meta:
         verbose_name = 'Назначенное задание'

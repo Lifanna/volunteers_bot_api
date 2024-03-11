@@ -20,11 +20,13 @@ from . import views
 urlpatterns = [
     path('', views.index),
     path('api/user-profile/<telegram_user_id>', views.UserProfileAPIView.as_view()),
-    path('api/links/<telegram_user_id>', views.UserWorkListAPIView.as_view()),
+    path('api/links/<telegram_user_id>/<offset>', views.UserWorkListAPIView.as_view()),
     path('api/tasks/<telegram_user_id>', views.TaskListAPIView.as_view()),
     path('api/send_link/', views.UserWorkCreateAPIView.as_view()),
     path('api/auth/verify/', views.VerifyAPIView.as_view()),
     path('api/auth/signin/', views.LoginAPIView.as_view()),
     path('api/rating/', views.RatingAPIView.as_view()),
     path('api/tasks/new/', views.UserTaskCreateAPIView.as_view()),
+    path('api/tasks/update/', views.UserTaskUpdateAPIView.as_view()),
+    path('api/user_tasks/<telegram_user_id>', views.UserTaskListAPIView.as_view()),
 ]
